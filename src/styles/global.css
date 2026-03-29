@@ -1,0 +1,8 @@
+@import "tailwindcss";
+body {
+	@apply flex min-h-dvh flex-col overflow-x-hidden;
+}
+
+main {
+	@apply grow px-5 py-20 md:px-20 lg:px-30;
+}

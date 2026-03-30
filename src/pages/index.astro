@@ -1,9 +1,86 @@
 ---
-import Layout from '../layouts/Layout.astro';
+import Layout from "../layouts/Layout.astro";
 ---
 
-<Layout title="Astro Scaffold">
-    <main>
-
-    </main>
+<Layout title="sf10 prototype">
+	<main class="font-['courier_new']">
+		<div class="space-y-1">
+			<div class="flex">
+				<input
+					type="file"
+					id="fileInput"
+					accept=".csv"
+					class="cursor-pointer text-sm file:mr-4 file:rounded-xs file:border file:px-4 file:py-px file:text-sm hover:file:bg-gray-100"
+				/>
+				<button
+					type="submit"
+					id="submitBtn"
+					class="cursor-pointer font-bold underline">Upload</button
+				>
+			</div>
+		</div>
+		<p class="mt-10 text-xs">
+			Prototype for batch filling of SF10 forms. Developed by Jerwin x. <a
+				href="https://github.com/jrwnnnn/sf10"
+				target="_blank"
+				class="text-blue-500 underline">Source</a
+			>
+		</p>
+	</main>
 </Layout>
+
+<script>
+	import { fill } from "@utils/fill";
+	import { validate } from "@utils/validate";
+	import { PDFDocument } from "pdf-lib";
+	import { saveAs } from "file-saver";
+	import JSZip from "jszip";
+	import Papa from "papaparse";
+
+	const input = document.getElementById("fileInput") as HTMLInputElement;
+	const submit = document.getElementById("submitBtn") as HTMLButtonElement;
+
+	submit.addEventListener("click", async () => {
+		const file = input.files?.[0];
+		if (!file) return;
+
+		console.log("Validating CSV file...");
+		if (!(await validate(file))) return;
+
+		Papa.parse(file, {
+			header: true,
+			skipEmptyLines: true,
+			encoding: "ISO-8859-1",
+			complete: async function (results) {
+				const rows = results.data as Record<string, string>[];
+				console.log(`Parsed ${rows.length} rows from CSV. Generating PDFs...`);
+				const zip = new JSZip();
+				const res = await fetch("/acroform.pdf");
+				const template = await res.arrayBuffer();
+
+				for (const row of rows) {
+					const pdfDoc = await PDFDocument.load(template);
+					const form = pdfDoc.getForm();
+					fill(form, row);
+
+					// form.flatten();
+
+					const pdfBytes = await pdfDoc.save();
+					const fileName = `${row.last_name}_${row.first_name}.pdf`.replace(
+						/\s+/g,
+						"_",
+					);
+					zip.file(fileName, pdfBytes);
+				}
+
+				console.log("Zipping...");
+				const content = await zip.generateAsync({ type: "blob" });
+				saveAs(content, "SF10_Batch_Export.zip");
+				console.log("Donezo! PDFs generated and zipped successfully.");
+			},
+			error: function (error) {
+				console.error("Error parsing CSV:", error);
+			},
+		});
+	});
+</script>

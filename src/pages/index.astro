@@ -30,10 +30,11 @@ import Layout from "../layouts/Layout.astro";
 </Layout>
 
 <script>
-	import { fill } from "@utils/fill";
+	import { fill, type Fonts } from "@utils/fill";
 	import { validate } from "@utils/validate";
 	import { PDFDocument } from "pdf-lib";
 	import { saveAs } from "file-saver";
+	import fontkit from "@pdf-lib/fontkit";
 	import JSZip from "jszip";
 	import Papa from "papaparse";
 
@@ -44,24 +45,44 @@ import Layout from "../layouts/Layout.astro";
 		const file = input.files?.[0];
 		if (!file) return;
 
-		console.log("Validating CSV file...");
 		if (!(await validate(file))) return;
+
+		const [
+			template,
+			arialBytes,
+			arialBoldBytes,
+			arialNarrowBytes,
+			arialNarrowBoldBytes,
+		] = await Promise.all([
+			fetch("/acroform.pdf").then((r) => r.arrayBuffer()),
+			fetch("/fonts/Arial.ttf").then((r) => r.arrayBuffer()),
+			fetch("/fonts/Arial-Bold.ttf").then((r) => r.arrayBuffer()),
+			fetch("/fonts/Arial-Narrow.ttf").then((r) => r.arrayBuffer()),
+			fetch("/fonts/Arial-Narrow-Bold.ttf").then((r) => r.arrayBuffer()),
+		]);
 
 		Papa.parse(file, {
 			header: true,
 			skipEmptyLines: true,
 			encoding: "ISO-8859-1",
-			complete: async function (results) {
+			complete: async (results) => {
 				const rows = results.data as Record<string, string>[];
-				console.log(`Parsed ${rows.length} rows from CSV. Generating PDFs...`);
+				console.log(`Parsed ${rows.length} rows. Generating PDFs...`);
 				const zip = new JSZip();
-				const res = await fetch("/acroform.pdf");
-				const template = await res.arrayBuffer();
 
 				for (const row of rows) {
 					const pdfDoc = await PDFDocument.load(template);
+					pdfDoc.registerFontkit(fontkit);
 					const form = pdfDoc.getForm();
-					fill(form, row);
+
+					const fonts: Fonts = {
+						arial: await pdfDoc.embedFont(arialBytes),
+						arialBold: await pdfDoc.embedFont(arialBoldBytes),
+						arialNarrow: await pdfDoc.embedFont(arialNarrowBytes),
+						arialNarrowBold: await pdfDoc.embedFont(arialNarrowBoldBytes),
+					};
+
+					fill(form, row, fonts);
 
 					// form.flatten();
 
@@ -73,13 +94,9 @@ import Layout from "../layouts/Layout.astro";
 					zip.file(fileName, pdfBytes);
 				}
 
-				console.log("Zipping...");
 				const content = await zip.generateAsync({ type: "blob" });
 				saveAs(content, "SF10_Batch_Export.zip");
-				console.log("Donezo! PDFs generated and zipped successfully.");
-			},
-			error: function (error) {
-				console.error("Error parsing CSV:", error);
+				console.log("Done.");
 			},
 		});
 	});

@@ -10,11 +10,12 @@
 		"typecheck": "astro check"
 	},
 	"dependencies": {
-		"@astrojs/node": "^10.0.4",
 		"@astrojs/vercel": "^10.0.3",
-		"@libsql/client": "^0.17.0",
 		"@tailwindcss/vite": "^4.1.18",
 		"astro": "^6.1.1",
+		"jszip": "^3.10.1",
+		"papaparse": "^5.5.3",
+		"pdf-lib": "^1.17.1",
 		"tailwindcss": "^4.1.18"
 	},
 	"devDependencies": {

@@ -1,4 +1,5 @@
 import type { PDFForm, PDFFont } from "pdf-lib";
+import { TextAlignment } from "pdf-lib";
 
 export interface Fonts {
 	arial: PDFFont;
@@ -12,47 +13,70 @@ export const fill = async (
 	row: Record<string, string>,
 	fonts: Fonts,
 ) => {
-	const setField = (pdfField: string, value: string, font: PDFFont) => {
+	function setField(
+		pdfField: string,
+		value: string,
+		font: PDFFont,
+		alignment = TextAlignment.Left,
+	) {
 		const field = form.getTextField(pdfField);
-		field.setText(value || ""); // set value first
-		field.updateAppearances(font); // then lock in the font
-	};
+		field.setAlignment(alignment);
+		field.setText(value || "");
+		field.updateAppearances(font);
+	}
 
-	const setCheck = (pdfField: string) => {
+	function tick(pdfField: string) {
 		form.getCheckBox(pdfField).check();
-	};
+	}
 
-	console.log(`Creating SF10 for ${row.first_name} ${row.last_name}...`);
+	console.log(`Creating SF10 for ${row.last_name}, ${row.first_name}...`);
 
-	setField("info.lrn", row.lrn || "", fonts.arialBold);
+	setField("info.lrn", row.lrn || "", fonts.arialBold, TextAlignment.Center);
 	setField(
 		"info.last_name",
 		(row.last_name || "").toUpperCase(),
 		fonts.arialBold,
+		TextAlignment.Center,
 	);
 	setField(
 		"info.first_name",
 		(row.first_name || "").toUpperCase(),
 		fonts.arialBold,
+		TextAlignment.Center,
 	);
 	setField(
 		"info.middle_name",
 		(row.middle_name || "").toUpperCase(),
 		fonts.arialBold,
+		TextAlignment.Center,
 	);
-	setField("info.extn", (row.extn || "").toUpperCase(), fonts.arialBold);
-	setField("info.sex", (row.sex || "").toUpperCase(), fonts.arialBold);
-	setField("info.birthdate", row.birthdate || "", fonts.arialBold);
-
+	setField(
+		"info.extn",
+		(row.extn || "").toUpperCase(),
+		fonts.arialBold,
+		TextAlignment.Center,
+	);
+	setField(
+		"info.sex",
+		(row.sex || "").toUpperCase(),
+		fonts.arialBold,
+		TextAlignment.Center,
+	);
+	setField(
+		"info.birthdate",
+		row.birthdate || "",
+		fonts.arialBold,
+		TextAlignment.Center,
+	);
 	switch (row.credential_presented_for_grade_1) {
 		case "Kinder Progress Report":
-			setCheck("credential.checkbox.kinder_progress_report");
+			tick("credential.checkbox.kinder_progress_report");
 			break;
 		case "ECCD Checklist":
-			setCheck("credential.checkbox.eccd_checklist");
+			tick("credential.checkbox.eccd_checklist");
 			break;
 		case "Kindergarten Certificate of Completion":
-			setCheck("credential.checkbox.kindergarten_certificate_of_completion");
+			tick("credential.checkbox.kindergarten_certificate_of_completion");
 			break;
 	}
 

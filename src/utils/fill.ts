@@ -1,26 +1,48 @@
-import type { PDFForm } from "pdf-lib";
+import type { PDFForm, PDFFont } from "pdf-lib";
 
-export const fill = async (form: PDFForm, row: Record<string, string>) => {
+export interface Fonts {
+	arial: PDFFont;
+	arialBold: PDFFont;
+	arialNarrow: PDFFont;
+	arialNarrowBold: PDFFont;
+}
 
-	const setField = (pdfField: string, value: string) => {
+export const fill = async (
+	form: PDFForm,
+	row: Record<string, string>,
+	fonts: Fonts,
+) => {
+	const setField = (pdfField: string, value: string, font: PDFFont) => {
 		const field = form.getTextField(pdfField);
-		field.setText(value || "");
+		field.setText(value || ""); // set value first
+		field.updateAppearances(font); // then lock in the font
 	};
 
 	const setCheck = (pdfField: string) => {
-		const checkbox = form.getCheckBox(pdfField);
-		checkbox.check();
+		form.getCheckBox(pdfField).check();
 	};
 
-	console.log(`Creating an SF10 for ${row.first_name} ${row.last_name}...`);
+	console.log(`Creating SF10 for ${row.first_name} ${row.last_name}...`);
 
-	setField("info.lrn", row.lrn || "");
-	setField("info.last_name", (row.last_name || "").toUpperCase());
-	setField("info.first_name", (row.first_name || "").toUpperCase());
-	setField("info.middle_name", (row.middle_name || "").toUpperCase());
-	setField("info.extn", (row.extn || "").toUpperCase());
-	setField("info.sex", (row.sex || "").toUpperCase());
-	setField("info.birthdate", row.birthdate || "");
+	setField("info.lrn", row.lrn || "", fonts.arialBold);
+	setField(
+		"info.last_name",
+		(row.last_name || "").toUpperCase(),
+		fonts.arialBold,
+	);
+	setField(
+		"info.first_name",
+		(row.first_name || "").toUpperCase(),
+		fonts.arialBold,
+	);
+	setField(
+		"info.middle_name",
+		(row.middle_name || "").toUpperCase(),
+		fonts.arialBold,
+	);
+	setField("info.extn", (row.extn || "").toUpperCase(), fonts.arialBold);
+	setField("info.sex", (row.sex || "").toUpperCase(), fonts.arialBold);
+	setField("info.birthdate", row.birthdate || "", fonts.arialBold);
 
 	switch (row.credential_presented_for_grade_1) {
 		case "Kinder Progress Report":
@@ -34,9 +56,19 @@ export const fill = async (form: PDFForm, row: Record<string, string>) => {
 			break;
 	}
 
-	setField("credential.name_of_school", row.school_name || "");
-	setField("credential.school_id", row.lrn.slice(0, 6) || "");
-	setField("credential.school_address", row.school_address || "");
-
-	console.log("Done.");
+	setField(
+		"credential.name_of_school",
+		row.school_name || "",
+		fonts.arialNarrowBold,
+	);
+	setField(
+		"credential.school_id",
+		row.lrn.slice(0, 6) || "",
+		fonts.arialNarrowBold,
+	);
+	setField(
+		"credential.school_address",
+		row.school_address || "",
+		fonts.arialNarrowBold,
+	);
 };

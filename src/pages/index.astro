@@ -1,34 +1,200 @@
 ---
 import Layout from "../layouts/Layout.astro";
+const formFields = [
+	{
+		name: "school_name",
+		label: "School Name",
+	},
+	{
+		name: "school_id",
+		label: "School ID",
+	},
+	{
+		name: "district",
+		label: "District",
+	},
+	{
+		name: "division",
+		label: "Division",
+	},
+	{
+		name: "region",
+		label: "Region",
+	},
+	{
+		name: "section",
+		label: "Section",
+	},
+	{
+		name: "school_year",
+		label: "School Year",
+	},
+	{
+		name: "adviser",
+		label: "Name of Adviser/Teacher",
+	},
+];
 ---
 
-<Layout title="sf10 prototype">
-	<main class="font-['courier_new']">
-		<div class="space-y-1">
-			<div class="flex">
+<Layout title="Rekord BETA">
+	<main class="mx-auto max-w-3xl bg-white p-8 font-['courier_new'] text-black">
+		<form id="mainForm" class="space-y-8">
+			<header class="pb-4">
+				<div class="flex gap-2">
+					<h1 class="text-4xl font-bold tracking-tight">Rekord</h1>
+					<span class="text-blue-700">WIP</span>
+				</div>
+				<p class="mt-2 text-sm text-gray-700">
+					Batch fill your SF10 forms in one click. Just download the template,
+					fill it out with your students' info, and upload it back here to get a
+					zip file of ready-to-print PDFs.
+				</p>
+			</header>
+
+			<div class="space-y-2 opacity-50">
+				<p class="font-bold">1. Download Template</p>
+				<select
+					id="template-select"
+					class="w-full cursor-pointer border border-black bg-white px-3 py-2 text-sm focus:border-blue-600 focus:ring-1 focus:ring-blue-600 focus:outline-none"
+					disabled
+				>
+					<option value="" disabled selected>Select an option...</option>
+					<option value="templates/template_grade4.xlsx">Grade 4</option>
+				</select>
+			</div>
+
+			<div class="space-y-2">
+				<p class="font-bold">2. Upload CSV</p>
 				<input
 					type="file"
-					id="fileInput"
+					id="file"
+					name="file"
 					accept=".csv"
-					class="cursor-pointer text-sm file:mr-4 file:rounded-xs file:border file:px-4 file:py-px file:text-sm hover:file:bg-gray-100"
+					class="w-full cursor-pointer border border-black bg-white text-sm file:mr-4 file:border-0 file:border-r file:border-black file:px-4 file:py-2 file:text-sm file:font-bold hover:file:text-blue-700"
+					required
 				/>
-				<button
-					type="submit"
-					id="submitBtn"
-					class="cursor-pointer font-bold underline">Upload</button
-				>
 			</div>
-		</div>
-		<p class="mt-10 text-xs">
-			Prototype for batch filling of SF10 forms. Developed by Jerwin x. <a
-				href="https://github.com/jrwnnnn/sf10"
-				target="_blank"
-				class="text-blue-500 underline">Source</a
+
+			<div class="space-y-2 opacity-50">
+				<h2 class="font-bold">3. Define Scholastic Record Header</h2>
+				<div class="space-y-4">
+					<div class="flex flex-col">
+						<label for={"grade"} class="mb-1 text-sm font-medium text-gray-700">
+							Classified as Grade:
+						</label>
+						<select
+							id="grade"
+							name="grade"
+							class="w-full cursor-pointer border border-black bg-white px-3 py-2 text-sm focus:border-blue-600 focus:ring-1 focus:ring-blue-600 focus:outline-none"
+							required
+							disabled
+						>
+							<option value="" disabled selected>Select an option...</option>
+							<option value="4">Grade 4</option>
+						</select>
+					</div>
+					{
+						formFields.map((field) => (
+							<div class="flex flex-col">
+								<label
+									for={`input${field.name}`}
+									class="mb-1 text-sm font-medium text-gray-700"
+								>
+									{field.label}:
+								</label>
+								<input
+									id={`input${field.name}`}
+									name={`input${field.name}`}
+									type="text"
+									class="grow border border-black px-2 py-2 text-sm focus:border-blue-600 focus:ring-1 focus:ring-blue-600 focus:outline-none"
+									disabled
+								/>
+							</div>
+						))
+					}
+				</div>
+			</div>
+
+			<div class="space-y-2 opacity-50">
+				<h2 class="font-bold">4. Define Passing Criteria</h2>
+				<div class="flex flex-wrap space-y-4">
+					<p class="text-sm text-gray-700">
+						Mark a learning area as <strong>"Passed"</strong> if the student's grade
+						is greater than or equal to
+						<input
+							type="text"
+							id="criteria1"
+							name="criteria1"
+							value="75"
+							class="w-10 border-b border-gray-700 px-2 py-px text-sm font-bold focus:border-b-2 focus:border-blue-600 focus:outline-none"
+							disabled
+						/>. Otherwise, mark as <strong>"Failed"</strong>.
+					</p>
+
+					<p class="text-sm text-gray-700">
+						Promote a student if his/her grade is greater than or equal to
+						<input
+							type="text"
+							id="criteria1"
+							name="criteria1"
+							value="75"
+							class="w-10 border-b border-gray-700 px-2 py-px text-sm font-bold focus:border-b-2 focus:border-blue-600 focus:outline-none"
+							disabled
+						/>. Otherwise, mark as <strong>"Retained"</strong>.
+					</p>
+				</div>
+			</div>
+
+			<div class="space-y-2">
+				<h2 class="font-bold">5. Flatten?</h2>
+				<p class="text-sm text-gray-700">
+					By default, the generated PDFs will be editable. If you want to make
+					them non-editable, check the "Flatten PDFs" option. This will merge
+					the form fields with the PDF content, preventing any further changes.
+				</p>
+				<p
+					class="border border-dashed border-red-600 px-3 py-2 text-sm text-red-600"
+				>
+					⚠ There is a known issue where flattening may cause issues with Adobe
+					Acrobat.
+				</p>
+
+				<div class="mt-5 flex items-center gap-2">
+					<input
+						type="checkbox"
+						id="flatten"
+						name="flatten"
+						class="h-4 w-4 cursor-pointer border-gray-300 text-blue-600 focus:ring-blue-500"
+					/>
+					<label for="flatten" class="text-sm">Flatten PDFs</label>
+				</div>
+			</div>
+
+			<button
+				type="submit"
+				id="submitBtn"
+				class="mt-4 w-full cursor-pointer bg-blue-600 px-8 py-2 text-sm font-bold text-white hover:bg-blue-700"
 			>
-		</p>
+				Process
+			</button>
+		</form>
+
+		<footer class="mt-12 pt-4 text-xs text-gray-600">
+			<p>
+				&copy; {new Date().getFullYear()} Mark Jerwin.
+				<a
+					href="https://github.com/jrwnnnn/sf10"
+					target="_blank"
+					class="text-blue-600 underline hover:text-blue-800"
+				>
+					Source
+				</a>
+			</p>
+		</footer>
 	</main>
 </Layout>
 
+<script src="@utils/downloadTemplate.ts"></script>
 <script>
 	import { fill, type Fonts } from "@utils/fill";
 	import { validate } from "@utils/validate";
@@ -38,26 +204,20 @@ import Layout from "../layouts/Layout.astro";
 	import JSZip from "jszip";
 	import Papa from "papaparse";
 
-	const input = document.getElementById("fileInput") as HTMLInputElement;
-	const submit = document.getElementById("submitBtn") as HTMLButtonElement;
+	const form = document.getElementById("mainForm") as HTMLFormElement;
 
-	submit.addEventListener("click", async () => {
-		const file = input.files?.[0];
+	form.addEventListener("submit", async (e) => {
+		e.preventDefault();
+
+		const file = (form.file as HTMLInputElement).files?.[0];
+		const flatten = (form.flatten as HTMLInputElement).checked;
+
 		if (!file) return;
-
 		if (!(await validate(file))) return;
 
-		const [
-			template,
-			arialBytes,
-			arialBoldBytes,
-			arialNarrowBytes,
-			arialNarrowBoldBytes,
-		] = await Promise.all([
-			fetch("/acroform.pdf").then((r) => r.arrayBuffer()),
-			fetch("/fonts/Arial.ttf").then((r) => r.arrayBuffer()),
+		const template = await fetch("/acroform.pdf").then((r) => r.arrayBuffer());
+		const [arialBoldBytes, arialNarrowBoldBytes] = await Promise.all([
 			fetch("/fonts/Arial-Bold.ttf").then((r) => r.arrayBuffer()),
-			fetch("/fonts/Arial-Narrow.ttf").then((r) => r.arrayBuffer()),
 			fetch("/fonts/Arial-Narrow-Bold.ttf").then((r) => r.arrayBuffer()),
 		]);
 
@@ -73,25 +233,23 @@ import Layout from "../layouts/Layout.astro";
 				for (const row of rows) {
 					const pdfDoc = await PDFDocument.load(template);
 					pdfDoc.registerFontkit(fontkit);
-					const form = pdfDoc.getForm();
-
-					const fonts: Fonts = {
-						arial: await pdfDoc.embedFont(arialBytes),
+					const fonts = {
 						arialBold: await pdfDoc.embedFont(arialBoldBytes),
-						arialNarrow: await pdfDoc.embedFont(arialNarrowBytes),
 						arialNarrowBold: await pdfDoc.embedFont(arialNarrowBoldBytes),
 					};
+					const acroform = pdfDoc.getForm();
 
-					fill(form, row, fonts);
+					fill(acroform, row, fonts);
 
-					// form.flatten();
+					if (flatten) {
+						acroform.flatten();
+					}
 
-					const pdfBytes = await pdfDoc.save();
 					const fileName = `${row.last_name}_${row.first_name}.pdf`.replace(
 						/\s+/g,
 						"_",
 					);
-					zip.file(fileName, pdfBytes);
+					zip.file(fileName, await pdfDoc.save());
 				}
 
 				const content = await zip.generateAsync({ type: "blob" });

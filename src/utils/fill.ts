@@ -2,9 +2,7 @@ import type { PDFForm, PDFFont } from "pdf-lib";
 import { TextAlignment } from "pdf-lib";
 
 export interface Fonts {
-	arial: PDFFont;
 	arialBold: PDFFont;
-	arialNarrow: PDFFont;
 	arialNarrowBold: PDFFont;
 }
 
@@ -14,19 +12,19 @@ export const fill = async (
 	fonts: Fonts,
 ) => {
 	function setField(
-		pdfField: string,
+		acroformField: string,
 		value: string,
 		font: PDFFont,
 		alignment = TextAlignment.Left,
 	) {
-		const field = form.getTextField(pdfField);
+		const field = form.getTextField(acroformField);
 		field.setAlignment(alignment);
 		field.setText(value || "");
 		field.updateAppearances(font);
 	}
 
-	function tick(pdfField: string) {
-		form.getCheckBox(pdfField).check();
+	function tick(acroformField: string) {
+		form.getCheckBox(acroformField).check();
 	}
 
 	console.log(`Creating SF10 for ${row.last_name}, ${row.first_name}...`);

@@ -1,42 +1,96 @@
-import type { PDFForm } from "pdf-lib";
+import type { PDFForm, PDFFont } from "pdf-lib";
+import { TextAlignment } from "pdf-lib";
 
-export const fill = async (form: PDFForm, row: Record<string, string>) => {
+export interface Fonts {
+	arialBold: PDFFont;
+	arialNarrowBold: PDFFont;
+}
 
-	const setField = (pdfField: string, value: string) => {
-		const field = form.getTextField(pdfField);
+export const fill = async (
+	form: PDFForm,
+	row: Record<string, string>,
+	fonts: Fonts,
+) => {
+	function setField(
+		acroformField: string,
+		value: string,
+		font: PDFFont,
+		alignment = TextAlignment.Left,
+	) {
+		const field = form.getTextField(acroformField);
+		field.setAlignment(alignment);
 		field.setText(value || "");
-	};
+		field.updateAppearances(font);
+	}
 
-	const setCheck = (pdfField: string) => {
-		const checkbox = form.getCheckBox(pdfField);
-		checkbox.check();
-	};
+	function tick(acroformField: string) {
+		form.getCheckBox(acroformField).check();
+	}
 
-	console.log(`Creating an SF10 for ${row.first_name} ${row.last_name}...`);
+	console.log(`Creating SF10 for ${row.last_name}, ${row.first_name}...`);
 
-	setField("info.lrn", row.lrn || "");
-	setField("info.last_name", (row.last_name || "").toUpperCase());
-	setField("info.first_name", (row.first_name || "").toUpperCase());
-	setField("info.middle_name", (row.middle_name || "").toUpperCase());
-	setField("info.extn", (row.extn || "").toUpperCase());
-	setField("info.sex", (row.sex || "").toUpperCase());
-	setField("info.birthdate", row.birthdate || "");
-
+	setField("info.lrn", row.lrn || "", fonts.arialBold, TextAlignment.Center);
+	setField(
+		"info.last_name",
+		(row.last_name || "").toUpperCase(),
+		fonts.arialBold,
+		TextAlignment.Center,
+	);
+	setField(
+		"info.first_name",
+		(row.first_name || "").toUpperCase(),
+		fonts.arialBold,
+		TextAlignment.Center,
+	);
+	setField(
+		"info.middle_name",
+		(row.middle_name || "").toUpperCase(),
+		fonts.arialBold,
+		TextAlignment.Center,
+	);
+	setField(
+		"info.extn",
+		(row.extn || "").toUpperCase(),
+		fonts.arialBold,
+		TextAlignment.Center,
+	);
+	setField(
+		"info.sex",
+		(row.sex || "").toUpperCase(),
+		fonts.arialBold,
+		TextAlignment.Center,
+	);
+	setField(
+		"info.birthdate",
+		row.birthdate || "",
+		fonts.arialBold,
+		TextAlignment.Center,
+	);
 	switch (row.credential_presented_for_grade_1) {
 		case "Kinder Progress Report":
-			setCheck("credential.checkbox.kinder_progress_report");
+			tick("credential.checkbox.kinder_progress_report");
 			break;
 		case "ECCD Checklist":
-			setCheck("credential.checkbox.eccd_checklist");
+			tick("credential.checkbox.eccd_checklist");
 			break;
 		case "Kindergarten Certificate of Completion":
-			setCheck("credential.checkbox.kindergarten_certificate_of_completion");
+			tick("credential.checkbox.kindergarten_certificate_of_completion");
 			break;
 	}
 
-	setField("credential.name_of_school", row.school_name || "");
-	setField("credential.school_id", row.lrn.slice(0, 6) || "");
-	setField("credential.school_address", row.school_address || "");
-
-	console.log("Done.");
+	setField(
+		"credential.name_of_school",
+		row.school_name || "",
+		fonts.arialNarrowBold,
+	);
+	setField(
+		"credential.school_id",
+		row.lrn?.slice(0, 6) || "",
+		fonts.arialNarrowBold,
+	);
+	setField(
+		"credential.school_address",
+		row.school_address || "",
+		fonts.arialNarrowBold,
+	);
 };

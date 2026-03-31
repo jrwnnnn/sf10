@@ -85,7 +85,7 @@ export const fill = async (
 	);
 	setField(
 		"credential.school_id",
-		row.lrn.slice(0, 6) || "",
+		row.lrn?.slice(0, 6) || "",
 		fonts.arialNarrowBold,
 	);
 	setField(

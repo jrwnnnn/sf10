@@ -1,3 +1,4 @@
+import { error } from "@utils/progress";
 import Papa from "papaparse";
 
 const REQUIRED_COLUMNS = [
@@ -17,6 +18,7 @@ export function validate(file: File): Promise<boolean> {
 	return new Promise((resolve) => {
 		if (file.type !== "text/csv" && !file.name.toLowerCase().endsWith(".csv")) {
 			console.error("Invalid file type. Expected CSV.");
+			error("Invalid file type.", "Please upload a .csv file.");
 			return resolve(false);
 		}
 
@@ -25,30 +27,26 @@ export function validate(file: File): Promise<boolean> {
 			skipEmptyLines: true,
 			complete: (results) => {
 				const columns = results.meta.fields;
-
-				if (!columns) {
-					console.error("Could not parse columns.");
-					return resolve(false);
-				}
-
 				const missing = REQUIRED_COLUMNS.filter(
-					(col) => !columns.includes(col),
+					(col) => !columns!.includes(col),
 				);
 
 				if (missing.length > 0) {
 					console.error(`Invalid CSV. Missing columns: ${missing.join(", ")}`);
+					error("Invalid CSV.", `Missing columns: ${missing.join(", ")}`);
 					return resolve(false);
 				}
 
 				if (results.data.length === 0) {
-					console.error("CSV is empty.");
+					error("CSV is empty.", "The uploaded CSV file is empty.");
 					return resolve(false);
 				}
 
 				resolve(true);
 			},
-			error: (error) => {
-				console.error("Error parsing CSV:", error);
+			error: (parseError) => {
+				console.error("Error parsing CSV:", parseError);
+				error("Error parsing CSV.", parseError.message as string);
 				resolve(false);
 			},
 		});

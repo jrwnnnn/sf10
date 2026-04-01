@@ -27,8 +27,6 @@ export const fill = async (
 		form.getCheckBox(acroformField).check();
 	}
 
-	console.log(`Creating SF10 for ${row.last_name}, ${row.first_name}...`);
-
 	setField("info.lrn", row.lrn || "", fonts.arialBold, TextAlignment.Center);
 	setField(
 		"info.last_name",

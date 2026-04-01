@@ -37,7 +37,7 @@ const formFields = [
 ---
 
 <Layout title="Rekord BETA">
-	<main class="mx-auto max-w-3xl bg-white p-8 font-['courier_new'] text-black">
+	<main class="mx-auto max-w-3xl bg-white p-8 text-black">
 		<form id="mainForm" class="space-y-8">
 			<header class="pb-4">
 				<div class="flex gap-2">
@@ -154,7 +154,7 @@ const formFields = [
 				</p>
 				<a href="https://github.com/jrwnnnn/rekord/issues/6" target="_blank">
 					<p
-						class="border border-dashed border-red-600 px-3 py-2 text-sm text-red-600 hover:bg-red-50"
+						class="border border-dashed border-red-600 px-3 py-2 text-sm text-red-600 hover:bg-red-50 cursor-pointer"
 					>
 						⚠ There is a known issue where flattening may cause issues with
 						Adobe Acrobat.
@@ -172,6 +172,20 @@ const formFields = [
 				</div>
 			</div>
 
+			<div id="progress" class="hidden gap-5 border-3 border-gray-700 p-3">
+				<img
+					src="https://i.pinimg.com/originals/88/71/4a/88714a27c1a6c90148b5793a4b8ad8cb.gif"
+					class="w-20 h-20"
+				/>
+				<div>
+					<h1 class="line-clamp-1 font-bold">Processing...</h1>
+					<p class="text-sm text-gray-700">
+						Feel free to keep working while we generate the files in the
+						background.
+					</p>
+				</div>
+			</div>
+
 			<button
 				type="submit"
 				id="submitBtn"
@@ -185,7 +199,7 @@ const formFields = [
 			<p>
 				&copy; {new Date().getFullYear()} Mark Jerwin.
 				<a
-					href="https://github.com/jrwnnnn/sf10"
+					href="https://github.com/jrwnnnn/rekord"
 					target="_blank"
 					class="text-blue-600 underline hover:text-blue-800"
 				>
@@ -201,6 +215,7 @@ const formFields = [
 	import { fill } from "@utils/fill";
 	import { validate } from "@utils/validate";
 	import { PDFDocument } from "pdf-lib";
+	import { progress } from "@utils/progress";
 	import { saveAs } from "file-saver";
 	import fontkit from "@pdf-lib/fontkit";
 	import JSZip from "jszip";
@@ -215,6 +230,8 @@ const formFields = [
 		const flatten = (form.flatten as HTMLInputElement).checked;
 
 		if (!file) return;
+
+		progress("Parsing CSV file...");
 		if (!(await validate(file))) return;
 
 		const template = await fetch("/acroform.pdf").then((r) => r.arrayBuffer());
@@ -229,7 +246,7 @@ const formFields = [
 			encoding: "ISO-8859-1",
 			complete: async (results) => {
 				const rows = results.data as Record<string, string>[];
-				console.log(`Parsed ${rows.length} rows. Generating PDFs...`);
+				progress(`Parsed ${rows.length} rows. Generating PDFs...`);
 				const zip = new JSZip();
 
 				for (const row of rows) {
@@ -240,6 +257,8 @@ const formFields = [
 						arialNarrowBold: await pdfDoc.embedFont(arialNarrowBoldBytes),
 					};
 					const acroform = pdfDoc.getForm();
+
+					progress(`Creating SF10 for ${row.last_name}, ${row.first_name}...`);
 
 					fill(acroform, row, fonts);
 
@@ -254,9 +273,16 @@ const formFields = [
 					zip.file(fileName, await pdfDoc.save());
 				}
 
+				progress("Generating ZIP file...");
+
 				const content = await zip.generateAsync({ type: "blob" });
 				saveAs(content, "SF10_Batch_Export.zip");
-				console.log("Done.");
+
+				progress(
+					"Done.",
+					"Your download should automatically start now. If it doesn't, click the button below to download manually.",
+					"https://media.tenor.com/GWewIVSoJBcAAAAM/yippee.gif",
+				);
 			},
 		});
 	});

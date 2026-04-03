@@ -212,7 +212,7 @@ const formFields = [
 
 <script src="@utils/downloadTemplate.ts"></script>
 <script>
-	import { fill } from "@utils/fill";
+	import { populateFields } from "@utils/populateFields";
 	import { validate } from "@utils/validate";
 	import { PDFDocument } from "pdf-lib";
 	import { updateProgressBar } from "@utils/progress";
@@ -235,6 +235,7 @@ const formFields = [
 		updateProgressBar("Parsing CSV file...");
 		if (!(await validate(file))) return;
 
+		// Load the PDF template and fonts
 		const template = await fetch("/acroform.pdf").then((r) => r.arrayBuffer());
 		const [arialBoldBytes, arialNarrowBoldBytes] = await Promise.all([
 			fetch("/fonts/Arial-Bold.ttf").then((r) => r.arrayBuffer()),
@@ -243,7 +244,8 @@ const formFields = [
 
 		Papa.parse(file, {
 			header: true,
-			skipEmptyLines: true,
+			comments: "#",
+			skipEmptyLines: "greedy",
 			encoding: "ISO-8859-1",
 			complete: async (results) => {
 				const rows = results.data as Record<string, string>[];
@@ -252,8 +254,12 @@ const formFields = [
 				const zip = new JSZip();
 
 				for (const row of rows) {
-					const pdfDoc = await PDFDocument.load(template);
-					pdfDoc.registerFontkit(fontkit);
+					// Load the PDF template and register fontkit
+					const pdfDoc = await PDFDocument.load(template).then((doc) => {
+						doc.registerFontkit(fontkit);
+						return doc;
+					});
+					// Embed the fonts
 					const fonts = {
 						arialBold: await pdfDoc.embedFont(arialBoldBytes),
 						arialNarrowBold: await pdfDoc.embedFont(arialNarrowBoldBytes),
@@ -264,16 +270,18 @@ const formFields = [
 						`Creating SF10 for ${row["info.last_name"]}, ${row["info.first_name"]}...`,
 					);
 
-					fill(acroform, row, fonts);
+					populateFields(acroform, row, fonts);
 
 					if (flatten) {
 						acroform.flatten();
 					}
 
-					const fileName = `${row.last_name}_${row.first_name}.pdf`.replace(
-						/\s+/g,
-						"_",
-					);
+					const fileName =
+						`${row["info.last_name"]}_${row["info.first_name"]}.pdf`.replace(
+							/\s+/g,
+							"_",
+						);
+
 					zip.file(fileName, await pdfDoc.save());
 				}
 

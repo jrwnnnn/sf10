@@ -23,7 +23,7 @@ function setFontSize(
 	}
 }
 
-export async function fill(
+export async function populateFields(
 	form: PDFForm,
 	row: Record<string, string>,
 	fonts: Fonts,

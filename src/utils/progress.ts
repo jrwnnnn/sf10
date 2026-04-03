@@ -10,7 +10,7 @@ function showProgress() {
 	progressContainer.classList.add("flex");
 }
 
-export function progress(
+export function updateProgressBar(
 	headerText = "Processing...",
 	subheaderText = "Feel free to keep working while we generate the files in the background.",
 	imageUrl = "https://i.pinimg.com/originals/88/71/4a/88714a27c1a6c90148b5793a4b8ad8cb.gif",
@@ -18,16 +18,5 @@ export function progress(
 	header.textContent = headerText;
 	subheader.textContent = subheaderText;
 	image.src = imageUrl;
-	console.log(headerText);
-	showProgress();
-}
-
-export function error(
-	headerText = "An error occurred.",
-	subheaderText = "An error occurred while processing your request. Please try again.",
-) {
-	header.textContent = headerText;
-	subheader.textContent = subheaderText;
-	image.src = "https://cdn-icons-png.flaticon.com/512/6514/6514954.png";
 	showProgress();
 }

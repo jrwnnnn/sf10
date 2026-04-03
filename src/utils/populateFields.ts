@@ -25,38 +25,42 @@ function setFontSize(
 
 export async function populateFields(
 	form: PDFForm,
-	row: Record<string, string>,
 	fonts: Fonts,
+	csvRow: Record<string, string>,
 ) {
-	console.log(`Creating SF10 for ${row["info.last_name"]}, ${row["info.first_name"]}...`);
+	console.log(
+		`Creating SF10 for ${csvRow["info.last_name"]}, ${csvRow["info.first_name"]}...`,
+	);
 
-	for (const [fieldName, value] of Object.entries(row)) {
+	for (const [pdfFieldName, value] of Object.entries(csvRow)) {
 		// Skip checkbox fields and the "credential_presented_for_grade_1" field for now
 		if (
-			fieldName.includes(".checkbox.") ||
-			fieldName === "credential_presented_for_grade_1"
+			pdfFieldName.includes(".checkbox.") ||
+			pdfFieldName === "credential_presented_for_grade_1"
 		)
 			continue;
 
-		const field = form.getTextField(fieldName);
-		field.setAlignment(TextAlignment.Center);
+		const pdfField = form.getTextField(pdfFieldName);
+		pdfField.setAlignment(TextAlignment.Center);
 
 		// Uppercase fields that start with "info."
-		field.setText(
-			fieldName.includes("info.") ? (value || "").toUpperCase() : value || "",
+		pdfField.setText(
+			pdfFieldName.includes("info.")
+				? (value || "").toUpperCase()
+				: value || "",
 		);
 
-		if (fieldName.includes("credential.")) {
-			setFontSize(field, value, fonts.arialNarrowBold, 11);
-			field.setAlignment(TextAlignment.Left);
-			field.updateAppearances(fonts.arialNarrowBold);
+		if (pdfFieldName.includes("credential.")) {
+			setFontSize(pdfField, value, fonts.arialNarrowBold, 11);
+			pdfField.setAlignment(TextAlignment.Left);
+			pdfField.updateAppearances(fonts.arialNarrowBold);
 		} else {
-			setFontSize(field, value, fonts.arialBold, 12);
-			field.updateAppearances(fonts.arialBold);
+			setFontSize(pdfField, value, fonts.arialBold, 12);
+			pdfField.updateAppearances(fonts.arialBold);
 		}
 	}
 
 	const schoolIdField = form.getTextField("credential.school_id");
-	schoolIdField.setText(row["info.lrn"]?.slice(0, 6) || "");
+	schoolIdField.setText(csvRow["info.lrn"]?.slice(0, 6) || "");
 	schoolIdField.updateAppearances(fonts.arialBold);
 }

@@ -1,4 +1,4 @@
-import type { PDFForm, PDFFont } from "pdf-lib";
+import type { PDFForm, PDFFont, PDFTextField } from "pdf-lib";
 import { TextAlignment } from "pdf-lib";
 
 export interface Fonts {
@@ -6,89 +6,57 @@ export interface Fonts {
 	arialNarrowBold: PDFFont;
 }
 
-export const fill = async (
+function setFontSize(
+	field: PDFTextField,
+	value: string,
+	font: PDFFont,
+	maxSize = 12,
+) {
+	const widgets = field.acroField.getWidgets();
+	const widget = widgets[0];
+	const fieldWidth = widget.getRectangle().width;
+
+	if (font.widthOfTextAtSize(value, maxSize) > fieldWidth) {
+		field.setFontSize(0);
+	} else {
+		field.setFontSize(maxSize);
+	}
+}
+
+export async function fill(
 	form: PDFForm,
 	row: Record<string, string>,
 	fonts: Fonts,
-) => {
-	function setField(
-		acroformField: string,
-		value: string,
-		font: PDFFont,
-		alignment = TextAlignment.Left,
-	) {
-		const field = form.getTextField(acroformField);
-		field.setAlignment(alignment);
-		field.setText(value || "");
-		field.updateAppearances(font);
+) {
+	console.log(`Creating SF10 for ${row["info.last_name"]}, ${row["info.first_name"]}...`);
+
+	for (const [fieldName, value] of Object.entries(row)) {
+		// Skip checkbox fields and the "credential_presented_for_grade_1" field for now
+		if (
+			fieldName.includes(".checkbox.") ||
+			fieldName === "credential_presented_for_grade_1"
+		)
+			continue;
+
+		const field = form.getTextField(fieldName);
+		field.setAlignment(TextAlignment.Center);
+
+		// Uppercase fields that start with "info."
+		field.setText(
+			fieldName.includes("info.") ? (value || "").toUpperCase() : value || "",
+		);
+
+		if (fieldName.includes("credential.")) {
+			setFontSize(field, value, fonts.arialNarrowBold, 11);
+			field.setAlignment(TextAlignment.Left);
+			field.updateAppearances(fonts.arialNarrowBold);
+		} else {
+			setFontSize(field, value, fonts.arialBold, 12);
+			field.updateAppearances(fonts.arialBold);
+		}
 	}
 
-	function tick(acroformField: string) {
-		form.getCheckBox(acroformField).check();
-	}
-
-	setField("info.lrn", row.lrn || "", fonts.arialBold, TextAlignment.Center);
-	setField(
-		"info.last_name",
-		(row.last_name || "").toUpperCase(),
-		fonts.arialBold,
-		TextAlignment.Center,
-	);
-	setField(
-		"info.first_name",
-		(row.first_name || "").toUpperCase(),
-		fonts.arialBold,
-		TextAlignment.Center,
-	);
-	setField(
-		"info.middle_name",
-		(row.middle_name || "").toUpperCase(),
-		fonts.arialBold,
-		TextAlignment.Center,
-	);
-	setField(
-		"info.extn",
-		(row.extn || "").toUpperCase(),
-		fonts.arialBold,
-		TextAlignment.Center,
-	);
-	setField(
-		"info.sex",
-		(row.sex || "").toUpperCase(),
-		fonts.arialBold,
-		TextAlignment.Center,
-	);
-	setField(
-		"info.birthdate",
-		row.birthdate || "",
-		fonts.arialBold,
-		TextAlignment.Center,
-	);
-	switch (row.credential_presented_for_grade_1) {
-		case "Kinder Progress Report":
-			tick("credential.checkbox.kinder_progress_report");
-			break;
-		case "ECCD Checklist":
-			tick("credential.checkbox.eccd_checklist");
-			break;
-		case "Kindergarten Certificate of Completion":
-			tick("credential.checkbox.kindergarten_certificate_of_completion");
-			break;
-	}
-
-	setField(
-		"credential.name_of_school",
-		row.school_name || "",
-		fonts.arialNarrowBold,
-	);
-	setField(
-		"credential.school_id",
-		row.lrn?.slice(0, 6) || "",
-		fonts.arialNarrowBold,
-	);
-	setField(
-		"credential.school_address",
-		row.school_address || "",
-		fonts.arialNarrowBold,
-	);
-};
+	const schoolIdField = form.getTextField("credential.school_id");
+	schoolIdField.setText(row["info.lrn"]?.slice(0, 6) || "");
+	schoolIdField.updateAppearances(fonts.arialBold);
+}

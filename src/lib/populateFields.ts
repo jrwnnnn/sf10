@@ -1,5 +1,5 @@
 import type { PDFForm, PDFFont } from "pdf-lib";
-import { setFontSize } from "./setFontSize";
+import { setFontSize } from "@utils/setFontSize";
 import { TextAlignment } from "pdf-lib";
 
 export interface Fonts {

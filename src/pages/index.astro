@@ -143,7 +143,7 @@ import htmlFields from "../data/htmlFields.json";
 				</div>
 			</div>
 
-			<div id="progress" class="hidden gap-5 border-3 border-gray-700 p-3">
+			<div id="progress-banner" class="hidden gap-5 border-3 border-gray-700 p-3">
 				<img
 					src="https://i.pinimg.com/originals/88/71/4a/88714a27c1a6c90148b5793a4b8ad8cb.gif"
 					class="h-20 w-20"
@@ -183,10 +183,10 @@ import htmlFields from "../data/htmlFields.json";
 
 <script src="@utils/downloadTemplate.ts"></script>
 <script>
-	import { populateFields } from "@utils/populateFields";
-	import { validate } from "@utils/validate";
+	import { populateFields } from "@lib/populateFields";
+	import { validate } from "@lib/validateCSV";
 	import { PDFDocument } from "pdf-lib";
-	import { updateProgressBar } from "@utils/progress";
+	import { updateProgressBanner } from "@utils/progressBanner";
 	import { saveAs } from "file-saver";
 	import fontkit from "@pdf-lib/fontkit";
 	import htmlFields from "../data/htmlFields.json";
@@ -212,7 +212,7 @@ import htmlFields from "../data/htmlFields.json";
 		if (!csvFile) return;
 
 		console.log("Parsing CSV file...");
-		updateProgressBar("Parsing CSV file...");
+		updateProgressBanner("Parsing CSV file...");
 		if (!(await validate(csvFile))) return;
 
 		// Load the PDF template and fonts
@@ -230,7 +230,7 @@ import htmlFields from "../data/htmlFields.json";
 			complete: async (results) => {
 				const rows = results.data as Record<string, string>[];
 				console.log(`Parsed ${rows.length} rows. Generating PDFs...`);
-				updateProgressBar(`Parsed ${rows.length} rows. Generating PDFs...`);
+				updateProgressBanner(`Parsed ${rows.length} rows. Generating PDFs...`);
 				const zip = new JSZip();
 
 				for (const row of rows) {
@@ -246,7 +246,7 @@ import htmlFields from "../data/htmlFields.json";
 					};
 					const acroform = pdfDoc.getForm();
 
-					updateProgressBar(
+					updateProgressBanner(
 						`Creating SF10 for ${row["info.last_name"]}, ${row["info.first_name"]}...`,
 					);
 
@@ -266,13 +266,13 @@ import htmlFields from "../data/htmlFields.json";
 				}
 
 				console.log("Generating ZIP file...");
-				updateProgressBar("Generating ZIP file...");
+				updateProgressBanner("Generating ZIP file...");
 
 				const content = await zip.generateAsync({ type: "blob" });
 				saveAs(content, "SF10_Batch_Export.zip");
 
 				console.log("Done.");
-				updateProgressBar(
+				updateProgressBanner(
 					"Done.",
 					"Your download should automatically start now. If it doesn't, click the button below to download manually.",
 					"https://media.tenor.com/GWewIVSoJBcAAAAM/yippee.gif",

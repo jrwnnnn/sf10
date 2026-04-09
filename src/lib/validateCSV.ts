@@ -1,4 +1,4 @@
-import { updateProgressBar } from "@utils/progress";
+import { updateProgressBanner } from "@utils/progressBanner";
 import Papa from "papaparse";
 import schema from "../data/schema.json";
 
@@ -9,7 +9,7 @@ export function validate(file: File): Promise<boolean> {
 		// Check if the file is a CSV based on MIME type and extension
 		if (file.type !== "text/csv" && !file.name.toLowerCase().endsWith(".csv")) {
 			console.error("Invalid file type. Expected CSV.");
-			updateProgressBar(
+			updateProgressBanner(
 				"Invalid file type.",
 				"Please upload a .csv file.",
 				"https://cdn-icons-png.flaticon.com/512/6514/6514954.png",
@@ -42,7 +42,7 @@ export function validate(file: File): Promise<boolean> {
 					console.error(
 						`Invalid CSV. ${missingColumns.length} missing columns: ${missingColumns}`,
 					);
-					updateProgressBar(
+					updateProgressBanner(
 						"Invalid CSV.",
 						message,
 						"https://cdn-icons-png.flaticon.com/512/6514/6514954.png",
@@ -53,7 +53,7 @@ export function validate(file: File): Promise<boolean> {
 
 				// Check if CSV is empty
 				if (results.data.length === 0) {
-					updateProgressBar(
+					updateProgressBanner(
 						"CSV is empty.",
 						"The uploaded CSV file is empty.",
 						"https://cdn-icons-png.flaticon.com/512/6514/6514954.png",
@@ -65,7 +65,7 @@ export function validate(file: File): Promise<boolean> {
 			},
 			error: (parseError) => {
 				console.error("Error parsing CSV:", parseError);
-				updateProgressBar(
+				updateProgressBanner(
 					"Error parsing CSV.",
 					parseError.message as string,
 					"https://cdn-icons-png.flaticon.com/512/6514/6514954.png",

@@ -57,7 +57,9 @@ export async function populateFields(
 		if (pdfFieldName === "credential_presented_for_grade_1") {
 			for (const [label, fieldName] of Object.entries(checkboxMap)) {
 				const checkbox = form.getCheckBox(fieldName);
-				value === "All" || value.includes(label) ? checkbox.check() : null;
+				if (value === "All" || value.includes(label)) {
+					checkbox.check();
+				}
 			}
 			continue;
 		}

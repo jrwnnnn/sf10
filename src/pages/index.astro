@@ -1,39 +1,6 @@
 ---
 import Layout from "../layouts/Layout.astro";
-const formFields = [
-	{
-		name: "school_name",
-		label: "School Name",
-	},
-	{
-		name: "school_id",
-		label: "School ID",
-	},
-	{
-		name: "district",
-		label: "District",
-	},
-	{
-		name: "division",
-		label: "Division",
-	},
-	{
-		name: "region",
-		label: "Region",
-	},
-	{
-		name: "section",
-		label: "Section",
-	},
-	{
-		name: "school_year",
-		label: "School Year",
-	},
-	{
-		name: "adviser",
-		label: "Name of Adviser/Teacher",
-	},
-];
+import htmlFields from "../data/htmlFields.json";
 ---
 
 <Layout title="Rekord BETA">
@@ -75,42 +42,46 @@ const formFields = [
 				/>
 			</div>
 
-			<div class="space-y-2 opacity-50">
-				<h2 class="font-bold">3. Define Scholastic Record Header</h2>
+			<div class="space-y-2">
+				<h2 class="font-bold">3. Define School and Class Info</h2>
 				<div class="space-y-4">
 					<div class="flex flex-col">
-						<label for={"grade"} class="mb-1 text-sm font-medium text-gray-700">
+						<label
+							for="classified_as_grade"
+							class="mb-1 text-sm font-medium text-gray-700"
+						>
 							Classified as Grade:
 						</label>
 						<select
-							id="grade"
-							name="grade"
+							id="classified_as_grade"
+							name="classified_as_grade"
 							class="w-full cursor-pointer border border-black bg-white px-3 py-2 text-sm focus:border-blue-600 focus:ring-1 focus:ring-blue-600 focus:outline-none"
 							required
-							disabled
 						>
 							<option value="" disabled selected>Select an option...</option>
 							<option value="4">Grade 4</option>
 						</select>
 					</div>
 					{
-						formFields.map((field) => (
-							<div class="flex flex-col">
-								<label
-									for={`input${field.name}`}
-									class="mb-1 text-sm font-medium text-gray-700"
-								>
-									{field.label}:
-								</label>
-								<input
-									id={`input${field.name}`}
-									name={`input${field.name}`}
-									type="text"
-									class="grow border border-black px-2 py-2 text-sm focus:border-blue-600 focus:ring-1 focus:ring-blue-600 focus:outline-none"
-									disabled
-								/>
-							</div>
-						))
+						htmlFields.map(
+							(field) =>
+								field.name !== "classified_as_grade" && (
+									<div class="flex flex-col">
+										<label
+											for={`input${field.name}`}
+											class="mb-1 text-sm font-medium text-gray-700"
+										>
+											{field.label}:
+										</label>
+										<input
+											id={`input${field.name}`}
+											name={`input${field.name}`}
+											type="text"
+											class="grow border border-black px-2 py-2 text-sm focus:border-blue-600 focus:ring-1 focus:ring-blue-600 focus:outline-none"
+										/>
+									</div>
+								),
+						)
 					}
 				</div>
 			</div>
@@ -154,7 +125,7 @@ const formFields = [
 				</p>
 				<a href="https://github.com/jrwnnnn/rekord/issues/6" target="_blank">
 					<p
-						class="border border-dashed border-red-600 px-3 py-2 text-sm text-red-600 hover:bg-red-50 cursor-pointer"
+						class="cursor-pointer border border-dashed border-red-600 px-3 py-2 text-sm text-red-600 hover:bg-red-50"
 					>
 						⚠ There is a known issue where flattening may cause issues with
 						Adobe Acrobat.
@@ -172,13 +143,13 @@ const formFields = [
 				</div>
 			</div>
 
-			<div id="progress" class="hidden gap-5 border-3 border-gray-700 p-3">
+			<div id="progress-banner" class="hidden gap-5 border-3 border-gray-700 p-3">
 				<img
 					src="https://i.pinimg.com/originals/88/71/4a/88714a27c1a6c90148b5793a4b8ad8cb.gif"
-					class="w-20 h-20"
+					class="h-20 w-20"
 				/>
 				<div>
-					<h1 class="line-clamp-1 font-bold">Processing...</h1>
+					<h1 class="line-clamp-2 font-bold">Processing...</h1>
 					<p class="text-sm text-gray-700">
 						Feel free to keep working while we generate the files in the
 						background.
@@ -212,73 +183,96 @@ const formFields = [
 
 <script src="@utils/downloadTemplate.ts"></script>
 <script>
-	import { fill } from "@utils/fill";
-	import { validate } from "@utils/validate";
+	import { populateFields } from "@lib/populateFields";
+	import { validate } from "@lib/validateCSV";
 	import { PDFDocument } from "pdf-lib";
-	import { progress } from "@utils/progress";
+	import { updateProgressBanner } from "@utils/progressBanner";
 	import { saveAs } from "file-saver";
 	import fontkit from "@pdf-lib/fontkit";
+	import htmlFields from "../data/htmlFields.json";
 	import JSZip from "jszip";
 	import Papa from "papaparse";
 
-	const form = document.getElementById("mainForm") as HTMLFormElement;
+	const htmlForm = document.getElementById("mainForm") as HTMLFormElement;
 
-	form.addEventListener("submit", async (e) => {
+	htmlForm.addEventListener("submit", async (e) => {
 		e.preventDefault();
 
-		const file = (form.file as HTMLInputElement).files?.[0];
-		const flatten = (form.flatten as HTMLInputElement).checked;
+		const csvFile = (htmlForm.file as HTMLInputElement).files?.[0];
+		const flatten = (htmlForm.flatten as HTMLInputElement).checked;
+		const classInfo = Object.fromEntries(
+			htmlFields.map((field: { name: string }) => [
+				field.name,
+				field.name === "classified_as_grade"
+					? (htmlForm.classified_as_grade as HTMLSelectElement).value
+					: (htmlForm[`input${field.name}`] as HTMLInputElement).value,
+			]),
+		);
 
-		if (!file) return;
+		if (!csvFile) return;
 
-		progress("Parsing CSV file...");
-		if (!(await validate(file))) return;
+		console.log("Parsing CSV file...");
+		updateProgressBanner("Parsing CSV file...");
+		if (!(await validate(csvFile))) return;
 
+		// Load the PDF template and fonts
 		const template = await fetch("/acroform.pdf").then((r) => r.arrayBuffer());
 		const [arialBoldBytes, arialNarrowBoldBytes] = await Promise.all([
 			fetch("/fonts/Arial-Bold.ttf").then((r) => r.arrayBuffer()),
 			fetch("/fonts/Arial-Narrow-Bold.ttf").then((r) => r.arrayBuffer()),
 		]);
 
-		Papa.parse(file, {
+		Papa.parse(csvFile, {
 			header: true,
-			skipEmptyLines: true,
+			comments: "#",
+			skipEmptyLines: "greedy",
 			encoding: "ISO-8859-1",
 			complete: async (results) => {
 				const rows = results.data as Record<string, string>[];
-				progress(`Parsed ${rows.length} rows. Generating PDFs...`);
+				console.log(`Parsed ${rows.length} rows. Generating PDFs...`);
+				updateProgressBanner(`Parsed ${rows.length} rows. Generating PDFs...`);
 				const zip = new JSZip();
 
 				for (const row of rows) {
-					const pdfDoc = await PDFDocument.load(template);
-					pdfDoc.registerFontkit(fontkit);
+					// Load the PDF template and register fontkit
+					const pdfDoc = await PDFDocument.load(template).then((doc) => {
+						doc.registerFontkit(fontkit);
+						return doc;
+					});
+					// Embed the fonts
 					const fonts = {
 						arialBold: await pdfDoc.embedFont(arialBoldBytes),
 						arialNarrowBold: await pdfDoc.embedFont(arialNarrowBoldBytes),
 					};
 					const acroform = pdfDoc.getForm();
 
-					progress(`Creating SF10 for ${row.last_name}, ${row.first_name}...`);
+					updateProgressBanner(
+						`Creating SF10 for ${row["info.last_name"]}, ${row["info.first_name"]}...`,
+					);
 
-					fill(acroform, row, fonts);
+					populateFields(acroform, fonts, classInfo, row);
 
 					if (flatten) {
 						acroform.flatten();
 					}
 
-					const fileName = `${row.last_name}_${row.first_name}.pdf`.replace(
-						/\s+/g,
-						"_",
-					);
+					const fileName =
+						`${row["info.last_name"]}_${row["info.first_name"]}.pdf`.replace(
+							/\s+/g,
+							"_",
+						);
+
 					zip.file(fileName, await pdfDoc.save());
 				}
 
-				progress("Generating ZIP file...");
+				console.log("Generating ZIP file...");
+				updateProgressBanner("Generating ZIP file...");
 
 				const content = await zip.generateAsync({ type: "blob" });
 				saveAs(content, "SF10_Batch_Export.zip");
 
-				progress(
+				console.log("Done.");
+				updateProgressBanner(
 					"Done.",
 					"Your download should automatically start now. If it doesn't, click the button below to download manually.",
 					"https://media.tenor.com/GWewIVSoJBcAAAAM/yippee.gif",

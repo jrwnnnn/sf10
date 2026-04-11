@@ -5,6 +5,7 @@
   "compilerOptions": {
 		"paths": {
 			"@utils/*": ["./src/utils/*"],
+			"@lib/*": ["./src/lib/*"]
 		}
 	}
 }

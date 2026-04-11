@@ -220,7 +220,7 @@ import htmlFields from "../data/htmlFields.json";
 		if (!(await validate(csvFile))) return;
 
 		// Load the PDF template and fonts
-		const template = await fetch("/acroform.pdf").then((r) => r.arrayBuffer());
+		const template = await fetch("/acroforms/es.pdf").then((r) => r.arrayBuffer());
 		const [arialBoldBytes, arialNarrowBoldBytes] = await Promise.all([
 			fetch("/fonts/Arial-Bold.ttf").then((r) => r.arrayBuffer()),
 			fetch("/fonts/Arial-Narrow-Bold.ttf").then((r) => r.arrayBuffer()),

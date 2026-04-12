@@ -64,25 +64,22 @@ import htmlFields from "../data/htmlFields.json";
 						</select>
 					</div>
 					{
-						htmlFields.map(
-							(field) =>
-								field.name !== "classified_as_grade" && (
-									<div class="flex flex-col">
-										<label
-											for={`input${field.name}`}
-											class="mb-1 text-sm font-medium text-gray-700"
-										>
-											{field.label}:
-										</label>
-										<input
-											id={`input${field.name}`}
-											name={`input${field.name}`}
-											type="text"
-											class="grow border border-black px-2 py-2 text-sm focus:border-blue-600 focus:ring-1 focus:ring-blue-600 focus:outline-none"
-										/>
-									</div>
-								),
-						)
+						htmlFields.map((field) => (
+							<div class="flex flex-col">
+								<label
+									for={`${field.name}`}
+									class="mb-1 text-sm font-medium text-gray-700"
+								>
+									{field.label}:
+								</label>
+								<input
+									id={`${field.name}`}
+									name={`${field.name}`}
+									type="text"
+									class="grow border border-black px-2 py-2 text-sm focus:border-blue-600 focus:ring-1 focus:ring-blue-600 focus:outline-none"
+								/>
+							</div>
+						))
 					}
 				</div>
 			</div>
@@ -95,8 +92,8 @@ import htmlFields from "../data/htmlFields.json";
 						is greater than or equal to
 						<input
 							type="text"
-							id="criteria1"
-							name="criteria1"
+							id="passing_criteria"
+							name="passing_criteria"
 							value="75"
 							class="w-10 border-b border-gray-700 px-2 py-px text-sm font-bold focus:border-b-2 focus:border-blue-600 focus:outline-none"
 							disabled
@@ -107,8 +104,8 @@ import htmlFields from "../data/htmlFields.json";
 						Promote a student if his/her grade is greater than or equal to
 						<input
 							type="text"
-							id="criteria1"
-							name="criteria1"
+							id="promotion_criteria"
+							name="promotion_criteria"
 							value="75"
 							class="w-10 border-b border-gray-700 px-2 py-px text-sm font-bold focus:border-b-2 focus:border-blue-600 focus:outline-none"
 							disabled
@@ -193,7 +190,6 @@ import htmlFields from "../data/htmlFields.json";
 	import { updateProgressBanner } from "@utils/progressBanner";
 	import { saveAs } from "file-saver";
 	import fontkit from "@pdf-lib/fontkit";
-	import htmlFields from "../data/htmlFields.json";
 	import JSZip from "jszip";
 	import Papa from "papaparse";
 
@@ -202,16 +198,8 @@ import htmlFields from "../data/htmlFields.json";
 	htmlForm.addEventListener("submit", async (e) => {
 		e.preventDefault();
 
-		const csvFile = (htmlForm.file as HTMLInputElement).files?.[0];
-		const flatten = (htmlForm.flatten as HTMLInputElement).checked;
-		const classInfo = Object.fromEntries(
-			htmlFields.map((field: { name: string }) => [
-				field.name,
-				field.name === "classified_as_grade"
-					? (htmlForm.classified_as_grade as HTMLSelectElement).value
-					: (htmlForm[`input${field.name}`] as HTMLInputElement).value,
-			]),
-		);
+		const htmlFormValues = Object.fromEntries(new FormData(htmlForm).entries());
+		const csvFile = htmlFormValues.file as File;
 
 		if (!csvFile) return;
 
@@ -263,9 +251,9 @@ import htmlFields from "../data/htmlFields.json";
 						`Creating SF10 for ${row["learner.last_name"]}, ${row["learner.first_name"]}...`,
 					);
 
-					populateFields(acroform, fonts, classInfo, row);
+					populateFields(acroform, fonts, htmlFormValues, row);
 
-					if (flatten) {
+					if (htmlFormValues.flatten === "on") {
 						acroform.flatten();
 					}
 

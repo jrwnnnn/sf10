@@ -47,18 +47,27 @@ function styleField(
 export async function populateFields(
 	form: PDFForm,
 	fonts: Fonts,
-	classInfo: Record<string, string>,
+	htmlFormValues: Record<string, FormDataEntryValue>,
 	csvRow: Record<string, string>,
 ) {
 	console.log(
 		`Creating SF10 for ${csvRow["learner.last_name"]}, ${csvRow["learner.first_name"]}...`,
 	);
 
-	// Populate school and class info fields based of the HTML form
-	for (const [htmlFieldName, value] of Object.entries(classInfo)) {
-		const pdfFieldName = `record_${classInfo.classified_as_grade}.${htmlFieldName}`;
+	//Populate school and class info fields based of the HTML form
+	const skipFields = [
+		"file",
+		"flatten",
+		"passing_criteria",
+		"promotion_criteria",
+		"classified_as_grade",
+	];
+
+	for (const [htmlFieldName, value] of Object.entries(htmlFormValues)) {
+		if (skipFields.includes(htmlFieldName)) continue;
+		const pdfFieldName = `record_${htmlFormValues.classified_as_grade}.${htmlFieldName}`;
 		const pdfField = form.getTextField(pdfFieldName);
-		pdfField.setText(value || "");
+		pdfField.setText(String(value || ""));
 	}
 
 	// Populate the remaining fields based on the CSV

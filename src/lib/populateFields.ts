@@ -13,10 +13,9 @@ function shrinkToFit(
 	maxSize: number,
 	fieldWidth: number,
 	minSize = 6,
-	step = 0.5,
 ): number {
 	if (!text) return maxSize;
-	for (let size = maxSize; size >= minSize; size -= step) {
+	for (let size = maxSize; size >= minSize; size -= 1) {
 		if (font.widthOfTextAtSize(text, size) <= fieldWidth) {
 			return size;
 		}

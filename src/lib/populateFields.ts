@@ -7,17 +7,38 @@ export interface Fonts {
 	arialNarrowBold: PDFFont;
 }
 
-function applyFieldStyle(
+function shrinkToFit(
+	text: string,
+	font: PDFFont,
+	maxSize: number,
+	fieldWidth: number,
+	minSize = 6,
+	step = 0.5,
+): number {
+	if (!text) return maxSize;
+	for (let size = maxSize; size >= minSize; size -= step) {
+		if (font.widthOfTextAtSize(text, size) <= fieldWidth) {
+			return size;
+		}
+	}
+	return minSize;
+}
+
+function styleField(
 	field: PDFTextField,
 	fonts: Fonts,
 	pdfFieldName: string,
 ): void {
+	const text = field.getText() ?? "";
+	const fieldWidth =
+		field.acroField.getWidgets()[0]?.getRectangle().width ?? Infinity;
+
 	if (pdfFieldName.startsWith("credential.")) {
-		field.setFontSize(11);
+		field.setFontSize(shrinkToFit(text, fonts.arialNarrowBold, 11, fieldWidth));
 		field.setAlignment(TextAlignment.Left);
 		field.updateAppearances(fonts.arialNarrowBold);
 	} else {
-		field.setFontSize(12);
+		field.setFontSize(shrinkToFit(text, fonts.arialBold, 12, fieldWidth));
 		field.setAlignment(TextAlignment.Center);
 		field.updateAppearances(fonts.arialBold);
 	}
@@ -33,25 +54,14 @@ export async function populateFields(
 		`Creating SF10 for ${csvRow["info.last_name"]}, ${csvRow["info.first_name"]}...`,
 	);
 
-	for (const field of form.getFields()) {
-		// Scrape /AP and seed missing /DA
-		if (!(field instanceof PDFTextField)) continue;
-		field.acroField.dict.delete(PDFName.of("AP"));
-		if (!field.acroField.getDefaultAppearance()) {
-			field.acroField.setDefaultAppearance("/Arial 12 Tf 0 g");
-		}
-		// Pre-style all fields so they won't fall back to Helvetica.
-		applyFieldStyle(field, fonts, field.getName());
-	}
-
-	// Populate school and class info fields based of the HTML form inputs
+	// Populate school and class info fields based of the HTML form
 	for (const [htmlFieldName, value] of Object.entries(classInfo)) {
 		const pdfFieldName = `scholastic_${classInfo.classified_as_grade}.${htmlFieldName}`;
 		const pdfField = form.getTextField(pdfFieldName);
 		pdfField.setText(value || "");
-		applyFieldStyle(pdfField, fonts, pdfFieldName);
 	}
 
+	// Populate the remaining fields based on the CSV
 	for (const [pdfFieldName, value] of Object.entries(csvRow)) {
 		// Handle checkbox fields
 		if (pdfFieldName === "credential_presented_for_grade_1") {
@@ -66,16 +76,23 @@ export async function populateFields(
 
 		const pdfField = form.getTextField(pdfFieldName);
 		pdfField.setText(
+			// For fields in the "info." namespace, convert to uppercase.
 			pdfFieldName.includes("info.")
 				? (value || "").toUpperCase()
 				: value || "",
 		);
-		applyFieldStyle(pdfField, fonts, pdfFieldName);
 	}
 
 	const schoolIdField = form.getTextField("credential.school_id");
 	schoolIdField.setText(csvRow["info.lrn"]?.slice(0, 6) || "");
-	applyFieldStyle(schoolIdField, fonts, "credential.school_id");
 
-	
+	// Scrape /AP and seed missing /DA for all text fields, then apply styling
+	for (const field of form.getFields()) {
+		if (!(field instanceof PDFTextField)) continue;
+		field.acroField.dict.delete(PDFName.of("AP"));
+		if (!field.acroField.getDefaultAppearance()) {
+			field.acroField.setDefaultAppearance("/Arial 12 Tf 0 g");
+		}
+		styleField(field, fonts, field.getName());
+	}
 }

@@ -240,8 +240,10 @@ import htmlFields from "../data/htmlFields.json";
 				const zip = new JSZip();
 
 				for (const row of rows) {
-					if (!row["info.lrn"]) {
-						console.warn(`Skipped row ${rows.indexOf(row) + 1} with missing LRN`);
+					if (!row["learner.lrn"]) {
+						console.warn(
+							`Skipped row ${rows.indexOf(row) + 1} with missing LRN`,
+						);
 						continue;
 					}
 
@@ -258,7 +260,7 @@ import htmlFields from "../data/htmlFields.json";
 					const acroform = pdfDoc.getForm();
 
 					updateProgressBanner(
-						`Creating SF10 for ${row["info.last_name"]}, ${row["info.first_name"]}...`,
+						`Creating SF10 for ${row["learner.last_name"]}, ${row["learner.first_name"]}...`,
 					);
 
 					populateFields(acroform, fonts, classInfo, row);
@@ -268,7 +270,7 @@ import htmlFields from "../data/htmlFields.json";
 					}
 
 					const fileName =
-						`${row["info.last_name"]}_${row["info.first_name"]}.pdf`.replace(
+						`${row["learner.last_name"]}_${row["learner.first_name"]}.pdf`.replace(
 							/\s+/g,
 							"_",
 						);

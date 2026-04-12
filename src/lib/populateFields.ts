@@ -1,4 +1,4 @@
-import type { PDFForm, PDFFont } from "pdf-lib";
+﻿import type { PDFForm, PDFFont } from "pdf-lib";
 import { PDFName, PDFTextField, TextAlignment } from "pdf-lib";
 import checkboxMap from "../data/checkboxMap.json";
 
@@ -33,7 +33,7 @@ function styleField(
 	const fieldWidth =
 		field.acroField.getWidgets()[0]?.getRectangle().width ?? Infinity;
 
-	if (pdfFieldName.startsWith("credential.")) {
+	if (pdfFieldName.startsWith("enrollment.")) {
 		field.setFontSize(shrinkToFit(text, fonts.arialNarrowBold, 11, fieldWidth));
 		field.setAlignment(TextAlignment.Left);
 		field.updateAppearances(fonts.arialNarrowBold);
@@ -51,12 +51,12 @@ export async function populateFields(
 	csvRow: Record<string, string>,
 ) {
 	console.log(
-		`Creating SF10 for ${csvRow["info.last_name"]}, ${csvRow["info.first_name"]}...`,
+		`Creating SF10 for ${csvRow["learner.last_name"]}, ${csvRow["learner.first_name"]}...`,
 	);
 
 	// Populate school and class info fields based of the HTML form
 	for (const [htmlFieldName, value] of Object.entries(classInfo)) {
-		const pdfFieldName = `scholastic_${classInfo.classified_as_grade}.${htmlFieldName}`;
+		const pdfFieldName = `record_${classInfo.classified_as_grade}.${htmlFieldName}`;
 		const pdfField = form.getTextField(pdfFieldName);
 		pdfField.setText(value || "");
 	}
@@ -76,15 +76,15 @@ export async function populateFields(
 
 		const pdfField = form.getTextField(pdfFieldName);
 		pdfField.setText(
-			// For fields in the "info." namespace, convert to uppercase.
-			pdfFieldName.includes("info.")
+			// For fields in the "learner." namespace, convert to uppercase.
+			pdfFieldName.includes("learner.")
 				? (value || "").toUpperCase()
 				: value || "",
 		);
 	}
 
-	const schoolIdField = form.getTextField("credential.school_id");
-	schoolIdField.setText(csvRow["info.lrn"]?.slice(0, 6) || "");
+	const schoolIdField = form.getTextField("enrollment.school_id");
+	schoolIdField.setText(csvRow["learner.lrn"]?.slice(0, 6) || "");
 
 	// Scrape /AP and seed missing /DA for all text fields, then apply styling
 	for (const field of form.getFields()) {

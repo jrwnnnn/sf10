@@ -2,9 +2,7 @@ import { updateProgressBanner } from "@utils/progressBanner";
 import Papa from "papaparse";
 import schema from "../data/schema.json";
 
-const grade = 4;
-
-export function validate(file: File): Promise<boolean> {
+export function validateCSV(file: File, grade: number): Promise<boolean> {
 	return new Promise((resolve) => {
 		// Check if the file is a CSV based on MIME type and extension
 		if (file.type !== "text/csv" && !file.name.toLowerCase().endsWith(".csv")) {
@@ -33,8 +31,8 @@ export function validate(file: File): Promise<boolean> {
 					let message = "";
 
 					if (missingColumns.length > 5) {
-						const shown = missingColumns.slice(0, 5).join(", ");
-						message = `Missing columns: ${shown}, and ${missingColumns.length - 5} more...`;
+						const shown = missingColumns.slice(0, 3).join(", ");
+						message = `Missing columns: ${shown}, and ${missingColumns.length - 3} more...`;
 					} else {
 						message = `Missing columns: ${missingColumns.join(", ")}`;
 					}

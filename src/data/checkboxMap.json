@@ -1,5 +1,5 @@
 {
-	"ECCD Checklist": "credential.checkbox.eccd_checklist",
-	"Kinder Progress Report": "credential.checkbox.kinder_progress_report",
-	"Kindergarten Certificate of Completion": "credential.checkbox.kindergarten_certificate_of_completion"
+	"ECCD Checklist": "enrollment.checkbox.eccd_checklist",
+	"Kinder Progress Report": "enrollment.checkbox.kinder_progress_report",
+	"Kindergarten Certificate of Completion": "enrollment.checkbox.kindergarten_certificate_of_completion"
 }

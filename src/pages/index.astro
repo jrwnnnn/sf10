@@ -185,7 +185,7 @@ import htmlFields from "../data/htmlFields.json";
 <script src="@utils/downloadTemplate.ts"></script>
 <script>
 	import { populateFields } from "@lib/populateFields";
-	import { validate } from "@lib/validateCSV";
+	import { validateCSV } from "@lib/validateCSV";
 	import { PDFDocument } from "pdf-lib";
 	import { updateProgressBanner } from "@utils/progressBanner";
 	import { saveAs } from "file-saver";
@@ -205,7 +205,13 @@ import htmlFields from "../data/htmlFields.json";
 
 		console.log("Parsing CSV file...");
 		updateProgressBanner("Parsing CSV file...");
-		if (!(await validate(csvFile))) return;
+		if (
+			!(await validateCSV(
+				csvFile,
+				parseInt(htmlFormValues.classified_as_grade as string),
+			))
+		) // fix: pass the selected grade level to the validateCSV function to check for the correct columns based on the grade schema
+			return;
 
 		// Load the PDF template and fonts
 		const template = await fetch("/acroforms/es.pdf").then((r) =>

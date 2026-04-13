@@ -1,8 +1,5 @@
 [
 	{
-		"name": "classified_as_grade"
-	},
-	{
 		"name": "name_of_school",
 		"label": "School Name"
 	},

@@ -1,64 +1,39 @@
 ﻿import type { PDFForm, PDFFont } from "pdf-lib";
-import { PDFName, PDFTextField, TextAlignment } from "pdf-lib";
+import { PDFName, PDFTextField } from "pdf-lib";
+import { styleField } from "@utils/styleField";
 import checkboxMap from "../data/checkboxMap.json";
 
-export interface Fonts {
+interface Fonts {
 	arialBold: PDFFont;
 	arialNarrowBold: PDFFont;
-}
-
-function shrinkToFit(
-	text: string,
-	font: PDFFont,
-	maxSize: number,
-	fieldWidth: number,
-	minSize = 6,
-	step = 0.5,
-): number {
-	if (!text) return maxSize;
-	for (let size = maxSize; size >= minSize; size -= step) {
-		if (font.widthOfTextAtSize(text, size) <= fieldWidth) {
-			return size;
-		}
-	}
-	return minSize;
-}
-
-function styleField(
-	field: PDFTextField,
-	fonts: Fonts,
-	pdfFieldName: string,
-): void {
-	const text = field.getText() ?? "";
-	const fieldWidth =
-		field.acroField.getWidgets()[0]?.getRectangle().width ?? Infinity;
-
-	if (pdfFieldName.startsWith("enrollment.")) {
-		field.setFontSize(shrinkToFit(text, fonts.arialNarrowBold, 11, fieldWidth));
-		field.setAlignment(TextAlignment.Left);
-		field.updateAppearances(fonts.arialNarrowBold);
-	} else {
-		field.setFontSize(shrinkToFit(text, fonts.arialBold, 12, fieldWidth));
-		field.setAlignment(TextAlignment.Center);
-		field.updateAppearances(fonts.arialBold);
-	}
 }
 
 export async function populateFields(
 	form: PDFForm,
 	fonts: Fonts,
-	classInfo: Record<string, string>,
+	htmlFormValues: Record<string, FormDataEntryValue>,
 	csvRow: Record<string, string>,
 ) {
 	console.log(
 		`Creating SF10 for ${csvRow["learner.last_name"]}, ${csvRow["learner.first_name"]}...`,
 	);
 
-	// Populate school and class info fields based of the HTML form
-	for (const [htmlFieldName, value] of Object.entries(classInfo)) {
-		const pdfFieldName = `record_${classInfo.classified_as_grade}.${htmlFieldName}`;
-		const pdfField = form.getTextField(pdfFieldName);
-		pdfField.setText(value || "");
+	const gradeLevel = htmlFormValues.classified_as_grade;
+
+	//Populate school/class info fields based of the HTML form
+	const SKIP_FIELDS = [
+		"file",
+		"flatten",
+		"passing_criteria",
+		"promotion_criteria",
+		"classified_as_grade",
+	];
+
+	for (const [htmlFieldName, value] of Object.entries(htmlFormValues)) {
+		if (SKIP_FIELDS.includes(htmlFieldName)) continue;
+		form
+			.getTextField(`record_${gradeLevel}.${htmlFieldName}`)
+			.setText(String(value || ""));
 	}
 
 	// Populate the remaining fields based on the CSV
@@ -66,16 +41,14 @@ export async function populateFields(
 		// Handle checkbox fields
 		if (pdfFieldName === "credential_presented_for_grade_1") {
 			for (const [label, fieldName] of Object.entries(checkboxMap)) {
-				const checkbox = form.getCheckBox(fieldName);
 				if (value === "All" || value.includes(label)) {
-					checkbox.check();
+					form.getCheckBox(fieldName).check();
 				}
 			}
 			continue;
 		}
 
-		const pdfField = form.getTextField(pdfFieldName);
-		pdfField.setText(
+		form.getTextField(pdfFieldName).setText(
 			// For fields in the "learner." namespace, convert to uppercase.
 			pdfFieldName.includes("learner.")
 				? (value || "").toUpperCase()
@@ -83,8 +56,9 @@ export async function populateFields(
 		);
 	}
 
-	const schoolIdField = form.getTextField("enrollment.school_id");
-	schoolIdField.setText(csvRow["learner.lrn"]?.slice(0, 6) || "");
+	form
+		.getTextField("enrollment.school_id")
+		.setText(csvRow["learner.lrn"]?.slice(0, 6) || "");
 
 	// Scrape /AP and seed missing /DA for all text fields, then apply styling
 	for (const field of form.getFields()) {

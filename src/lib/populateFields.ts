@@ -48,6 +48,20 @@ export async function populateFields(
 			continue;
 		}
 
+		// Handle remarks field based on final_rating
+		if (pdfFieldName.startsWith(`record_${gradeLevel}.final_rating.`)) {
+			const subjectCode = pdfFieldName.slice(
+				`record_${gradeLevel}.final_rating.`.length,
+			);
+			form
+				.getTextField(`record_${gradeLevel}.remarks.${subjectCode}`)
+				.setText(
+					Number(value) >= Number(htmlFormValues.passing_criteria)
+						? "Passed"
+						: "Failed",
+				);
+		}
+
 		form.getTextField(pdfFieldName).setText(
 			// For fields in the "learner." namespace, convert to uppercase.
 			pdfFieldName.includes("learner.")
@@ -56,9 +70,18 @@ export async function populateFields(
 		);
 	}
 
+	// Handle special cases for school_id and general_remark
 	form
 		.getTextField("enrollment.school_id")
 		.setText(csvRow["learner.lrn"]?.slice(0, 6) || "");
+	form
+		.getTextField(`record_${gradeLevel}.general_remark`)
+		.setText(
+			Number(csvRow[`record_${gradeLevel}.general_average`]) >=
+				Number(htmlFormValues.promotion_criteria)
+				? "Promoted"
+				: "Retained",
+		);
 
 	// Scrape /AP and seed missing /DA for all text fields, then apply styling
 	for (const field of form.getFields()) {
@@ -70,3 +93,5 @@ export async function populateFields(
 		styleField(field, fonts, field.getName());
 	}
 }
+
+// feat: Populate 

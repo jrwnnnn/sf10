@@ -7,6 +7,9 @@ dist/
 # Vercel build cache
 .vercel/
 
+# Wrangeler configs
+.wrangler/
+
 # dependencies
 node_modules/
 

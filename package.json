@@ -1,37 +1,42 @@
 {
-	"name": "jrwnnnn",
-	"type": "module",
-	"version": "0.0.1",
-	"scripts": {
-		"astro:dev": "astro dev",
-		"astro:build": "astro build",
-		"astro:preview": "astro preview",
-		"lint": "eslint .",
-		"typecheck": "astro check",
-		"test": "npm run lint && npm run typecheck && npm run astro:build"
-	},
-	"dependencies": {
-		"@astrojs/vercel": "^10.0.3",
-		"@pdf-lib/fontkit": "^1.1.1",
-		"@tailwindcss/vite": "^4.1.18",
-		"astro": "^6.1.1",
-		"file-saver": "^2.0.5",
-		"jszip": "^3.10.1",
-		"papaparse": "^5.5.3",
-		"pdf-lib": "^1.17.1",
-		"tailwindcss": "^4.1.18"
-	},
-	"devDependencies": {
-		"@astrojs/check": "^0.9.8",
-		"@eslint/js": "^10.0.1",
-		"@types/file-saver": "^2.0.7",
-		"@types/papaparse": "^5.5.2",
-		"eslint": "^10.0.2",
-		"eslint-plugin-astro": "^1.6.0",
-		"prettier": "^3.8.1",
-		"prettier-plugin-astro": "^0.14.1",
-		"prettier-plugin-tailwindcss": "^0.7.2",
-		"typescript": "^5.9.3",
-		"typescript-eslint": "^8.56.1"
-	}
+  "name": "rekord",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "astro:dev": "astro dev",
+    "astro:build": "astro build",
+    "astro:preview": "astro preview",
+    "lint": "eslint .",
+    "typecheck": "astro check",
+    "test": "npm run lint && npm run typecheck && npm run astro:build",
+    "generate-types": "wrangler types"
+  },
+  "dependencies": {
+    "@astrojs/cloudflare": "^13.1.9",
+    "@pdf-lib/fontkit": "^1.1.1",
+    "@tailwindcss/vite": "^4.1.18",
+    "astro": "^6.1.1",
+    "file-saver": "^2.0.5",
+    "jszip": "^3.10.1",
+    "papaparse": "^5.5.3",
+    "pdf-lib": "^1.17.1",
+    "tailwindcss": "^4.1.18",
+    "wrangler": "^4.82.2"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.8",
+    "@eslint/js": "^10.0.1",
+    "@types/file-saver": "^2.0.7",
+    "@types/papaparse": "^5.5.2",
+    "eslint": "^10.0.2",
+    "eslint-plugin-astro": "^1.6.0",
+    "prettier": "^3.8.1",
+    "prettier-plugin-astro": "^0.14.1",
+    "prettier-plugin-tailwindcss": "^0.7.2",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.56.1"
+  },
+  "overrides": {
+    "vite": "^7"
+  }
 }

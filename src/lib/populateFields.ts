@@ -83,6 +83,13 @@ export async function populateFields(
 				: "Retained",
 		);
 
+	// Handle special cases for "Other Credential Presented" checkboxes
+	if (csvRow["enrollment.others"])
+		form.getCheckBox("enrollment.checkbox.others").check();
+
+	if (csvRow["enrollment.pept.rating"])
+		form.getCheckBox("enrollment.checkbox.pept").check();
+
 	// Scrape /AP and seed missing /DA for all text fields, then apply styling
 	for (const field of form.getFields()) {
 		if (!(field instanceof PDFTextField)) continue;
@@ -93,5 +100,3 @@ export async function populateFields(
 		styleField(field, fonts, field.getName());
 	}
 }
-
-// feat: Populate 

@@ -6,7 +6,7 @@ const {
 	description = "Hello! It's Jerwin! I'm a student based in Manila, PH. I build things for the web. My code is held together by duct tape and prayers. I spend more time customizing my VS Code theme than actually coding. If you see a bug, no you didn't.",
 	robots = "index, follow",
 	ogType = "website",
-	image = "meta/meta-image.jpg"
+	image = "https://sf10.vercel.app/meta/meta-image.jpg"
 } = Astro.props;
 ---
 
@@ -15,14 +15,14 @@ const {
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<link rel="canonical" href={Astro.url} />
+		<link rel="canonical" href={new URL(Astro.url.pathname, Astro.site).href} />
 
 		<title>{title}</title>
 		<meta name="description" content={description} />
 		<meta name="robots" content={robots} />
 
 		<meta property="og:type" content={ogType} />
-		<meta property="og:url" content={Astro.url} />
+		<meta property="og:url" content={new URL(Astro.url.pathname, Astro.site).href} />
 		<meta property="og:title" content={title} />
 		<meta property="og:description" content={description} />
 		<meta property="og:image" content={image} />

@@ -3,12 +3,10 @@
   "type": "module",
   "version": "0.0.1",
   "scripts": {
-    "astro:dev": "astro dev",
-    "astro:build": "astro build",
-    "astro:preview": "astro preview",
-    "lint": "eslint .",
-    "typecheck": "astro check",
-    "test": "npm run lint && npm run typecheck && npm run astro:build",
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "test": "npx eslint . && npx astro check && npm run build",
     "generate-types": "wrangler types"
   },
   "dependencies": {

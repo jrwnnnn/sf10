@@ -19,6 +19,8 @@ The workflow is intentionally simple: download the template, complete your stude
 
 It is designed to reduce repetitive clerical work, minimize encoding mistakes, and make reporting periods less stressful for teachers alike.
 
+![Preview](.github/README/Screenshot%202026-04-16%20at%2013-10-25%20Rekord%20BETA.png)
+
 ## Support
 
 If you run into any issues, please [open an issue](https://github.com/jrwnnnn/rekord/issues) and include all relevant details needed to diagnose the problem.
@@ -40,6 +42,7 @@ The above copyright notice and this permission notice shall be included in all c
   <img src="https://contrib.rocks/image?repo=jrwnnnn/scaffold" />
 </a>
 
+<br>
 <br>
 
 <img src="https://forthebadge.com/images/badges/built-with-love.svg">

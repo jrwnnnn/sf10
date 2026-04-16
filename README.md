@@ -1,6 +1,6 @@
-<h1 align="center">Project Name</h1>
+<h1 align="center">Rekord</h1>
 
-<p align="center"><i>Quick one-liner about what this project does.</i></p>
+<p align="center"><i>Turn one CSV into a full class set of SF10 forms in minutes.</i></p>
 
 <div align="center">
    <!-- FIND PREMADE BADGES HERE: https://github.com/Ileriayo/markdown-badges -->
@@ -9,39 +9,28 @@
    <a href="https://sqlite.org"><img src="https://img.shields.io/badge/sqlite-%2307405e.svg?style=for-the-badge&logo=sqlite&logoColor=white"></a>
    <a href="./LICENSE"><img src="https://img.shields.io/github/license/jrwnnnn/scaffold?style=for-the-badge"></a>
    <a href="https://github.com/jrwnnnn/scaffold/stargazers"><img src="https://img.shields.io/github/stars/jrwnnnn/scaffold?style=for-the-badge"></a>
-   <a href="https://github.com/jrwnnnn/scaffold/actions"><img src="https://img.shields.io/github/actions/workflow/status/jrwnnnn/scaffold/main.yml?style=for-the-badge"></a>
 </div>
 
 <br>
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+Rekord is a practical tool for schools that need to produce many SF10 forms quickly and consistently. Instead of manually filling each PDF one by one, you can prepare your class data once in an Excel file, export to CSV, upload it, and let Rekord generate a ready-to-print output for the entire section.
 
-## Prerequisites
+The workflow is intentionally simple: download the template, complete your student records, export and upload the CSV, set your class and grading details, then process everything in one run. Rekord automatically maps learner fields, fills the official form layout, and packages all generated PDFs into a single ZIP file.
 
-Make sure the following are installed:
+It is designed to reduce repetitive clerical work, minimize encoding mistakes, and make reporting periods less stressful for teachers alike.
 
-- [Node.js](https://nodejs.org/en/download/current)
+![Preview](.github/README/Screenshot%202026-04-16%20at%2013-10-25%20Rekord%20BETA.png)
 
-## Development
+## Support
 
-```bash
-#Clone the repository
-git clone https://github.com/jrwnnnn/scaffold.git
-cd scaffold
-
-#Install the required dependencies
-npm install
-
-#Run the program
-npm run astro:dev
-```
+If you run into any issues, please [open an issue](https://github.com/jrwnnnn/rekord/issues) and include all relevant details needed to diagnose the problem.
 
 ## License
 
 Distributed under the MIT License.
 Copyright (c) 2026 Mark Jerwin(@jrwnnnn). All rights reserved.
 
-See the See the [LICENSE](LICENSE) file for full details.
+See the [LICENSE](LICENSE) file for full details.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 

@@ -15,9 +15,10 @@
 
 Rekord is a practical tool for schools that need to produce many SF10 forms quickly and consistently. Instead of manually filling each PDF one by one, you can prepare your class data once in an Excel file, export to CSV, upload it, and let Rekord generate a ready-to-print output for the entire section.
 
-The workflow is intentionally simple: download the template, complete your student records, export and upload the CSV, set your class and grading details, then process everything in one run. Rekord automatically maps learner fields, fills the official form layout, and packages all generated PDFs into a single ZIP file.
-
 It is designed to reduce repetitive clerical work, minimize encoding mistakes, and make reporting periods less stressful for teachers alike.
+
+> [!NOTE]  
+> Development for grade levels other than Grade 4 is currently on hold. Following DepEd's transition to a trimestral system, a new SF10 layout is expected for the upcoming school year. I will update this project once the new layout is released and I have the time to work on it. :)
 
 ![Preview](.github/README/Screenshot%202026-04-16%20at%2013-10-25%20Rekord%20BETA.png)
 
